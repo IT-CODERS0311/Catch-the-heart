@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catch The Heart</title>
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ffc2f7, #ffdef2);
+        font-family: "Poppins", sans-serif;
+    }
+
+    #basket {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 80px;
+        background: #b86eff;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 0 20px #d29aff;
+        transition: left 0.1s linear;
+    }
+
+    .heart {
+        position: absolute;
+        top: -40px;
+        font-size: 40px;
+        color: purple;
+        animation: fall 3.5s linear forwards;
+    }
+
+    @keyframes fall {
+        from { transform: translateY(0); }
+        to { transform: translateY(120vh); }
+    }
+
+    #scoreBox {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        padding: 10px 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #ff69b4;
+        font-weight: 600;
+    }
+
+    #message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 25px 40px;
+        border-radius: 15px;
+        text-align: center;
+        font-size: 20px;
+        display: none;
+        box-shadow: 0 0 20px #ffa4e4;
+    }
+
+    #startBtn, #restartBtn {
+        position: fixed;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 25px;
+        background: #b24af5;
+        color: white;
+        border: none;
+        font-size: 18px;
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow: 0 0 10px #d59bff;
+    }
+
+    #restartBtn {
+        display: none;
+        background: #ff4ab2;
+    }
+</style>
+</head>
+<body>
+
+<div id="scoreBox">Score: 0 / 15</div>
+<div id="basket"></div>
+
+<div id="message"></div>
+
+<button id="startBtn">Start Game</button>
+<button id="restartBtn">Play Again</button>
+
+<script>
+const basket = document.getElementById("basket");
+const scoreBox = document.getElementById("scoreBox");
+const message = document.getElementById("message");
+const startBtn = document.getElementById("startBtn");
+const restartBtn = document.getElementById("restartBtn");
+
+let score = 0;
+let heartsFallen = 0;
+const totalHearts = 15;
+
+const loveQuotes = [
+    "Aww you caught my heart! 💜",
+    "You're sweeter than this heart! 💗",
+    "My heart falls for you everytime 💘",
+    "Cute moves! You caught me again 💞",
+    "You're my favourite catcher ❤️"
+];
+
+function startGame() {
+    score = 0;
+    heartsFallen = 0;
+    scoreBox.innerHTML = `Score: 0 / ${totalHearts}`;
+    startBtn.style.display = "none";
+    restartBtn.style.display = "none";
+    message.style.display = "none";
+
+    dropHearts();
+}
+
+function dropHearts() {
+    let dropInterval = setInterval(() => {
+        if (heartsFallen >= totalHearts) {
+            clearInterval(dropInterval);
+            endGame();
+            return;
+        }
+
+        createHeart();
+        heartsFallen++;
+    }, 900);
+}
+
+function createHeart() {
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.textContent = "💜";
+
+    heart.style.left = Math.random() * 90 + "vw";
+    document.body.appendChild(heart);
+
+    const heartFall = setInterval(() => {
+        const heartRect = heart.getBoundingClientRect();
+        const basketRect = basket.getBoundingClientRect();
+
+        if (
+            heartRect.bottom >= basketRect.top &&
+            heartRect.left >= basketRect.left &&
+            heartRect.right <= basketRect.right
+        ) {
+            score++;
+            scoreBox.innerHTML = `Score: ${score} / ${totalHearts}`;
+
+            let randomLine = loveQuotes[Math.floor(Math.random() * loveQuotes.length)];
+            showMessage(randomLine);
+
+            heart.remove();
+            clearInterval(heartFall);
+        }
+
+        if (heartRect.top > window.innerHeight) {
+            heart.remove();
+            clearInterval(heartFall);
+        }
+    }, 50);
+}
+
+function endGame() {
+    if (score >= 8) {
+        message.innerHTML = `🎉 You Won! <br> Score: ${score}/${totalHearts}`;
+    } else {
+        message.innerHTML = `😢 You Lost! <br> Score: ${score}/${totalHearts}`;
+    }
+    message.style.display = "block";
+    restartBtn.style.display = "block";
+}
+
+function showMessage(text) {
+    message.innerHTML = text;
+    message.style.display = "block";
+    setTimeout(() => { message.style.display = "none"; }, 1200);
+}
+
+/* -------------------------
+   DESKTOP MOUSE CONTROL
+--------------------------*/
+document.addEventListener("mousemove", (e) => {
+    basket.style.left = e.clientX - 60 + "px";
+});
+
+/* -------------------------
+   MOBILE TOUCH CONTROL
+--------------------------*/
+document.addEventListener("touchmove", (e) => {
+    let touch = e.touches[0];
+    basket.style.left = touch.clientX - 60 + "px";
+});
+startBtn.addEventListener("click", startGame);
+restartBtn.addEventListener("click", startGame);
+</script>
+
+</body>
+</html>
